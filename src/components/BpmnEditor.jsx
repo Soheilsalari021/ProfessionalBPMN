@@ -119,12 +119,16 @@ export default function BpmnEditor({ xml, filename: initialFilename, onFilenameC
         });
     };
 
+    // Funktion zum Anpassen der Größe aller Tasks (und SubProcesses/CallActivities)
+    // Function to resize all tasks (and SubProcesses/CallActivities)
     const handleResizeTasks = () => {
         if (!modelerRef.current) return;
 
         const elementRegistry = modelerRef.current.get('elementRegistry');
         const modeling = modelerRef.current.get('modeling');
 
+        // Liste der Element-Typen, die angepasst werden sollen
+        // List of element types to resize
         const taskTypes = [
             'bpmn:Task',
             'bpmn:SubProcess',
@@ -138,8 +142,12 @@ export default function BpmnEditor({ xml, filename: initialFilename, onFilenameC
             'bpmn:ScriptTask'
         ];
 
+        // Finde alle relevanten Elemente im Diagramm
+        // Find all relevant elements in the diagram
         const tasks = elementRegistry.filter(element => taskTypes.includes(element.type));
 
+        // Setze für jedes Element die Größe auf 100x80 Pixel
+        // Set size to 100x80 pixels for each element
         tasks.forEach(task => {
             modeling.resizeShape(task, {
                 x: task.x,
@@ -149,6 +157,7 @@ export default function BpmnEditor({ xml, filename: initialFilename, onFilenameC
             });
         });
 
+        // Verbindungen (Pfeile) neu ausrichten, damit sie gerade sind
         // Re-layout all connections to ensure they are straight
         const connections = elementRegistry.filter(element => element.type === 'bpmn:SequenceFlow');
         connections.forEach(connection => {
@@ -156,6 +165,8 @@ export default function BpmnEditor({ xml, filename: initialFilename, onFilenameC
         });
     };
 
+    // Funktion zum Anwenden des Standard-Stils (Farben und Ränder)
+    // Function to apply standard styling (colors and borders)
     const handleStandardStyle = async () => {
         if (!modelerRef.current) return;
 
@@ -174,6 +185,7 @@ export default function BpmnEditor({ xml, filename: initialFilename, onFilenameC
             'bpmn:ScriptTask'
         ];
 
+        // 1. Färbe Tasks Gelb mit schwarzem Rand
         // 1. Color Tasks Yellow with Thin Black Border
         const tasks = elementRegistry.filter(element => taskTypes.includes(element.type));
 
@@ -183,6 +195,7 @@ export default function BpmnEditor({ xml, filename: initialFilename, onFilenameC
             stroke: '#000000'
         });
 
+        // Workaround: Setze stroke-width auf 1 via Canvas API, da setColor dies überschreibt
         // Set thin stroke width using canvas API
         const canvas = modelerRef.current.get('canvas');
         tasks.forEach(task => {
@@ -284,23 +297,29 @@ export default function BpmnEditor({ xml, filename: initialFilename, onFilenameC
         });
     };
 
-    // Combined Nagarro function: Convert + Fix Size + Standard Style
+    // Hauptfunktion für "Nagarro" Button: Führt alle Schritte nacheinander aus
+    // Main function for "Nagarro" button: Executes all steps sequentially
     const handleNagarro = async () => {
         if (!modelerRef.current) return;
 
-        // 1. Convert all specialized tasks to standard tasks
+        // Schritt 1: Konvertiere alle spezialisierten Tasks (UserTask, CallActivity etc.) in Standard-Tasks oder SubProcesses
+        // Step 1: Convert all specialized tasks to standard tasks
         handleConvertUserTasks();
 
-        // Wait for conversion to complete and registry to update
+        // Warte 300ms, damit die Konvertierung im BPMN-Modell abgeschlossen ist
+        // Wait 300ms for conversion to complete and registry to update
         await new Promise(resolve => setTimeout(resolve, 300));
 
-        // 2. Fix task sizes
+        // Schritt 2: Ändere die Größe aller Tasks auf 100x80 Pixel
+        // Step 2: Fix task sizes
         handleResizeTasks();
 
+        // Warte 300ms, damit das Resizing fertig ist und das DOM aktualisiert wurde
         // Wait for resizing to complete and DOM to update
         await new Promise(resolve => setTimeout(resolve, 300));
 
-        // 3. Apply standard style
+        // Schritt 3: Wende den Standard-Stil an (Gelb, dünner Rand)
+        // Step 3: Apply standard style
         await handleStandardStyle();
     };
 

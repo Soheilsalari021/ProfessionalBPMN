@@ -23,6 +23,7 @@ export async function processNagarroBPMN(xml) {
         // Import XML
         await modeler.importXML(xml);
 
+        // 1. Konvertiere alle spezialisierten Tasks in Standard-Tasks
         // 1. Convert all specialized tasks to standard tasks
         const elementRegistry = modeler.get('elementRegistry');
         const bpmnReplace = modeler.get('bpmnReplace');
@@ -43,6 +44,7 @@ export async function processNagarroBPMN(xml) {
             });
         });
 
+        // Konvertiere Call Activities in SubProcesses (für dünne Ränder)
         // Convert Call Activities to SubProcesses (for thin borders)
         const callActivities = elementRegistry.filter(element => element.type === 'bpmn:CallActivity');
         callActivities.forEach(callActivity => {
@@ -51,13 +53,16 @@ export async function processNagarroBPMN(xml) {
             });
         });
 
+        // 2. Passe Task-Größen an (inkl. SubProcesses)
         // 2. Fix task sizes (including subprocesses)
         const modeling = modeler.get('modeling');
         const tasks = elementRegistry.filter(element => element.type === 'bpmn:Task');
         const subProcesses = elementRegistry.filter(element => element.type === 'bpmn:SubProcess');
 
+        // Größe aller Tasks anpassen
         // Resize all tasks
         tasks.forEach(task => {
+            // Sicherheitscheck: Überspringe wenn Koordinaten fehlen
             if (task.x === undefined || task.y === undefined) return;
             const bounds = {
                 x: task.x,
@@ -68,6 +73,7 @@ export async function processNagarroBPMN(xml) {
             modeling.resizeShape(task, bounds);
         });
 
+        // Größe aller SubProcesses anpassen (auf gleiche Größe wie Tasks)
         // Resize all subprocesses to match task size
         subProcesses.forEach(subProcess => {
             if (subProcess.x === undefined || subProcess.y === undefined) return;

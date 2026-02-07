@@ -12,10 +12,28 @@ function App() {
   };
 
   return (
+    // Haupt-Layout der Anwendung: Header und Inhaltsbereich
+    // Main layout: Header and content area
     <div className="h-screen w-screen flex flex-col bg-white">
-      <header className="bg-gray-800 text-white p-4 shadow-md z-10 flex items-center space-x-3">
-        <img src="/logo.svg" alt="App Logo" className="h-8 w-8" />
-        <h1 className="text-xl font-bold">BPMN Editor</h1>
+      <header className="bg-gray-800 text-white p-4 shadow-md z-10 flex items-center">
+        <div
+          className="flex items-center space-x-3 cursor-pointer hover:opacity-80 transition-opacity"
+          onClick={() => {
+            if (xml) {
+              if (window.confirm('Are you sure you want to go back to home? Unsaved changes will be lost.')) {
+                setXml(null);
+                setFilename('diagram.bpmn');
+              }
+            } else {
+              setXml(null);
+              setFilename('diagram.bpmn');
+            }
+          }}
+          title="Go to Start Page"
+        >
+          <img src="/logo.svg" alt="App Logo" className="h-8 w-8" />
+          <h1 className="text-xl font-bold">BPMN Editor</h1>
+        </div>
       </header>
       <main className="flex-grow overflow-hidden relative">
         {!xml ? (
