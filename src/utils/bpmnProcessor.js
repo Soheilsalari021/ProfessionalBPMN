@@ -43,10 +43,12 @@ export async function processNagarroBPMN(xml) {
             });
         });
 
-        // 2. Fix task sizes
+        // 2. Fix task sizes (including subprocesses)
         const modeling = modeler.get('modeling');
         const tasks = elementRegistry.filter(element => element.type === 'bpmn:Task');
+        const subProcesses = elementRegistry.filter(element => element.type === 'bpmn:SubProcess');
 
+        // Resize all tasks
         tasks.forEach(task => {
             const bounds = {
                 x: task.x,
@@ -57,9 +59,21 @@ export async function processNagarroBPMN(xml) {
             modeling.resizeShape(task, bounds);
         });
 
+        // Resize all subprocesses to match task size
+        subProcesses.forEach(subProcess => {
+            const bounds = {
+                x: subProcess.x,
+                y: subProcess.y,
+                width: 100,
+                height: 80
+            };
+            modeling.resizeShape(subProcess, bounds);
+        });
+
         // 3. Apply standard colors directly
         const taskTypes = [
             'bpmn:Task',
+            'bpmn:SubProcess',
             'bpmn:UserTask',
             'bpmn:ServiceTask',
             'bpmn:SendTask',
