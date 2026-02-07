@@ -43,6 +43,14 @@ export async function processNagarroBPMN(xml) {
             });
         });
 
+        // Convert Call Activities to SubProcesses (for thin borders)
+        const callActivities = elementRegistry.filter(element => element.type === 'bpmn:CallActivity');
+        callActivities.forEach(callActivity => {
+            bpmnReplace.replaceElement(callActivity, {
+                type: 'bpmn:SubProcess'
+            });
+        });
+
         // 2. Fix task sizes (including subprocesses)
         const modeling = modeler.get('modeling');
         const tasks = elementRegistry.filter(element => element.type === 'bpmn:Task');
@@ -83,11 +91,28 @@ export async function processNagarroBPMN(xml) {
             'bpmn:ScriptTask'
         ];
 
-        // Color Tasks Yellow with Black Border
+        // Color Tasks Yellow with Thin Black Border
         const allTasks = elementRegistry.filter(element => taskTypes.includes(element.type));
+
+        // Set colors
         modeling.setColor(allTasks, {
             fill: '#FFFFCC',
             stroke: '#000000'
+        });
+
+        // Set thin stroke width using canvas API
+        const canvas = modeler.get('canvas');
+        allTasks.forEach(task => {
+            const gfx = canvas.getGraphics(task);
+            if (gfx) {
+                const visual = gfx.querySelector('.djs-visual');
+                if (visual) {
+                    const rect = visual.querySelector('rect, path, circle, polygon');
+                    if (rect) {
+                        rect.setAttribute('stroke-width', '1');
+                    }
+                }
+            }
         });
 
         // Reset Pools/Lanes to White with Black Border

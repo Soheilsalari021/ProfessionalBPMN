@@ -127,6 +127,8 @@ export default function BpmnEditor({ xml, filename: initialFilename, onFilenameC
 
         const taskTypes = [
             'bpmn:Task',
+            'bpmn:SubProcess',
+            'bpmn:CallActivity',
             'bpmn:UserTask',
             'bpmn:ServiceTask',
             'bpmn:SendTask',
@@ -162,6 +164,7 @@ export default function BpmnEditor({ xml, filename: initialFilename, onFilenameC
 
         const taskTypes = [
             'bpmn:Task',
+            'bpmn:SubProcess',
             'bpmn:UserTask',
             'bpmn:ServiceTask',
             'bpmn:SendTask',
@@ -171,11 +174,28 @@ export default function BpmnEditor({ xml, filename: initialFilename, onFilenameC
             'bpmn:ScriptTask'
         ];
 
-        // 1. Color Tasks Yellow with Black Border
+        // 1. Color Tasks Yellow with Thin Black Border
         const tasks = elementRegistry.filter(element => taskTypes.includes(element.type));
+
+        // Set colors
         modeling.setColor(tasks, {
             fill: '#FFFFCC',
             stroke: '#000000'
+        });
+
+        // Set thin stroke width using canvas API
+        const canvas = modelerRef.current.get('canvas');
+        tasks.forEach(task => {
+            const gfx = canvas.getGraphics(task);
+            if (gfx) {
+                const visual = gfx.querySelector('.djs-visual');
+                if (visual) {
+                    const rect = visual.querySelector('rect, path, circle, polygon');
+                    if (rect) {
+                        rect.setAttribute('stroke-width', '1');
+                    }
+                }
+            }
         });
 
         // 2. Reset Pools/Lanes to White with Black Border
@@ -254,6 +274,14 @@ export default function BpmnEditor({ xml, filename: initialFilename, onFilenameC
                 type: 'bpmn:Task'
             });
         });
+
+        // Convert Call Activities to SubProcesses (for thick border -> thin border)
+        const callActivities = elementRegistry.filter(element => element.type === 'bpmn:CallActivity');
+        callActivities.forEach(callActivity => {
+            bpmnReplace.replaceElement(callActivity, {
+                type: 'bpmn:SubProcess'
+            });
+        });
     };
 
     // Combined Nagarro function: Convert + Fix Size + Standard Style
@@ -263,8 +291,14 @@ export default function BpmnEditor({ xml, filename: initialFilename, onFilenameC
         // 1. Convert all specialized tasks to standard tasks
         handleConvertUserTasks();
 
+        // Wait for conversion to complete and registry to update
+        await new Promise(resolve => setTimeout(resolve, 300));
+
         // 2. Fix task sizes
         handleResizeTasks();
+
+        // Wait for resizing to complete and DOM to update
+        await new Promise(resolve => setTimeout(resolve, 300));
 
         // 3. Apply standard style
         await handleStandardStyle();
