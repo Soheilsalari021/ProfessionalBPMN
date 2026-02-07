@@ -58,6 +58,7 @@ export async function processNagarroBPMN(xml) {
 
         // Resize all tasks
         tasks.forEach(task => {
+            if (task.x === undefined || task.y === undefined) return;
             const bounds = {
                 x: task.x,
                 y: task.y,
@@ -69,6 +70,7 @@ export async function processNagarroBPMN(xml) {
 
         // Resize all subprocesses to match task size
         subProcesses.forEach(subProcess => {
+            if (subProcess.x === undefined || subProcess.y === undefined) return;
             const bounds = {
                 x: subProcess.x,
                 y: subProcess.y,
