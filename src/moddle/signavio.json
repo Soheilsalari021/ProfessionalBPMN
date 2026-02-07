@@ -1,0 +1,30 @@
+{
+    "name": "Signavio",
+    "uri": "http://www.signavio.com",
+    "prefix": "signavio",
+    "xml": {
+        "tagAlias": "lowerCase"
+    },
+    "types": [
+        {
+            "name": "SignavioMetaData",
+            "superClass": [
+                "Element"
+            ],
+            "properties": [
+                {
+                    "name": "metaKey",
+                    "isAttr": true,
+                    "type": "String"
+                },
+                {
+                    "name": "metaValue",
+                    "isAttr": true,
+                    "type": "String"
+                }
+            ]
+        }
+    ],
+    "associations": [],
+    "enumerations": []
+}

@@ -1,0 +1,11 @@
+{
+    "name": "BPMN in Color",
+    "uri": "http://www.omg.org/spec/BPMN/non-normative/color/1.0",
+    "prefix": "color",
+    "xml": {
+        "tagAlias": "lowerCase"
+    },
+    "types": [],
+    "associations": [],
+    "enumerations": []
+}
