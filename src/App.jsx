@@ -13,7 +13,8 @@ function App() {
 
   return (
     <div className="h-screen w-screen flex flex-col bg-white">
-      <header className="bg-gray-800 text-white p-4 shadow-md z-10">
+      <header className="bg-gray-800 text-white p-4 shadow-md z-10 flex items-center space-x-3">
+        <img src="/logo.svg" alt="App Logo" className="h-8 w-8" />
         <h1 className="text-xl font-bold">BPMN Editor</h1>
       </header>
       <main className="flex-grow overflow-hidden relative">
