@@ -23,11 +23,14 @@ export async function processNagarroBPMN(xml) {
         // Import XML
         await modeler.importXML(xml);
 
-        // 1. Konvertiere alle spezialisierten Tasks in Standard-Tasks
-        // 1. Convert all specialized tasks to standard tasks
         const elementRegistry = modeler.get('elementRegistry');
         const bpmnReplace = modeler.get('bpmnReplace');
+        const modeling = modeler.get('modeling');
 
+        // =====================================================
+        // Step 1: Convert all specialized tasks to standard tasks
+        // (Matches editor's handleConvertUserTasks)
+        // =====================================================
         const specializedTasks = elementRegistry.filter(element =>
             element.type === 'bpmn:UserTask' ||
             element.type === 'bpmn:ManualTask' ||
@@ -44,8 +47,7 @@ export async function processNagarroBPMN(xml) {
             });
         });
 
-        // Konvertiere Call Activities in SubProcesses (für dünne Ränder)
-        // Convert Call Activities to SubProcesses (for thin borders)
+        // Convert Call Activities to SubProcesses (thick border → thin border)
         const callActivities = elementRegistry.filter(element => element.type === 'bpmn:CallActivity');
         callActivities.forEach(callActivity => {
             bpmnReplace.replaceElement(callActivity, {
@@ -53,127 +55,17 @@ export async function processNagarroBPMN(xml) {
             });
         });
 
-        // 2. Passe Task-Größen an (inkl. SubProcesses)
-        // 2. Fix task sizes (including subprocesses)
-        const modeling = modeler.get('modeling');
-        const tasks = elementRegistry.filter(element => element.type === 'bpmn:Task');
-        const subProcesses = elementRegistry.filter(element => element.type === 'bpmn:SubProcess');
+        // Wait for conversion to complete (matches editor's 300ms delay)
+        await new Promise(resolve => setTimeout(resolve, 300));
 
-        // Größe aller Tasks anpassen
-        // Resize all tasks
-        tasks.forEach(task => {
-            // Sicherheitscheck: Überspringe wenn Koordinaten fehlen
-            if (task.x === undefined || task.y === undefined) return;
-            const bounds = {
-                x: task.x,
-                y: task.y,
-                width: 100,
-                height: 80
-            };
-            modeling.resizeShape(task, bounds);
-        });
-
-        // Größe aller SubProcesses anpassen (auf gleiche Größe wie Tasks)
-        // Resize all subprocesses to match task size
-        subProcesses.forEach(subProcess => {
-            if (subProcess.x === undefined || subProcess.y === undefined) return;
-            const bounds = {
-                x: subProcess.x,
-                y: subProcess.y,
-                width: 100,
-                height: 80
-            };
-            modeling.resizeShape(subProcess, bounds);
-        });
-
-        // 3. Auto-Layout Logic
-        // Simple BFS-based layout to organize nodes into levels
-
-        // Refresh elementRegistry after replacements
-        const elementsAfterResize = elementRegistry.getAll();
-        const startEvents = elementsAfterResize.filter(e => e.type === 'bpmn:StartEvent');
-
-        if (startEvents.length > 0) {
-            const visited = new Set();
-            const queue = [];
-            const elementLevels = new Map(); // elementId -> level
-
-            // Initialize BFS
-            startEvents.forEach(start => {
-                queue.push({ element: start, level: 0 });
-                visited.add(start.id);
-                elementLevels.set(start.id, 0);
-            });
-
-            let maxLevel = 0;
-
-            while (queue.length > 0) {
-                const { element, level } = queue.shift();
-                maxLevel = Math.max(maxLevel, level);
-
-                // Get outgoing sequence flows
-                const outgoing = element.outgoing || [];
-                outgoing.forEach(flow => {
-                    const target = flow.target;
-                    // Only process Shapes, ignore Connections in queue
-                    if (target && !visited.has(target.id) && target.type !== 'bpmn:SequenceFlow') {
-                        visited.add(target.id);
-                        elementLevels.set(target.id, level + 1);
-                        queue.push({ element: target, level: level + 1 });
-                    }
-                });
-            }
-
-            // Group elements by level
-            const levelGroups = new Map();
-            elementLevels.forEach((level, id) => {
-                if (!levelGroups.has(level)) levelGroups.set(level, []);
-                const el = elementRegistry.get(id);
-                if (el) levelGroups.get(level).push(el);
-            });
-
-            // Assign coordinates
-            const startX = 150;
-            const startY = 150;
-            const xStep = 220; // Horizontal spacing
-            const yStep = 150; // Vertical spacing
-
-            levelGroups.forEach((elements, level) => {
-                // Determine Y start for this level to center it?
-                // Or just stack from top
-                const levelHeight = elements.length * yStep;
-                const startYForLevel = startY - (levelHeight / 2) + (yStep / 2);
-
-                elements.forEach((element, index) => {
-                    // Calculate target position (center of shape)
-                    const targetX = startX + (level * xStep);
-                    const targetY = startYForLevel + (index * yStep);
-
-                    // Move element (delta)
-                    // Note: element.x/y are top-left coordinates usually
-                    // Let's assume we align top-left for simplicity or recalculate based on width/height
-
-                    const currentX = element.x;
-                    const currentY = element.y;
-
-                    const deltaX = targetX - currentX;
-                    const deltaY = targetY - currentY;
-
-                    if (deltaX !== 0 || deltaY !== 0) {
-                        try {
-                            modeling.moveElements([element], { x: deltaX, y: deltaY });
-                        } catch (e) {
-                            console.warn("Auto-layout move failed for", element.id, e);
-                        }
-                    }
-                });
-            });
-        }
-
-        // 4. Apply standard colors directly
+        // =====================================================
+        // Step 2: Resize all tasks to 100x80 pixels
+        // (Matches editor's handleResizeTasks)
+        // =====================================================
         const taskTypes = [
             'bpmn:Task',
             'bpmn:SubProcess',
+            'bpmn:CallActivity',
             'bpmn:UserTask',
             'bpmn:ServiceTask',
             'bpmn:SendTask',
@@ -183,10 +75,34 @@ export async function processNagarroBPMN(xml) {
             'bpmn:ScriptTask'
         ];
 
-        // Color Tasks Yellow with Thin Black Border
-        const allTasks = elementRegistry.filter(element => taskTypes.includes(element.type));
+        const tasksToResize = elementRegistry.filter(element => taskTypes.includes(element.type));
 
-        // Set colors
+        tasksToResize.forEach(task => {
+            if (task.x === undefined || task.y === undefined) return;
+            modeling.resizeShape(task, {
+                x: task.x,
+                y: task.y,
+                width: 100,
+                height: 80
+            });
+        });
+
+        // Re-layout all connections to ensure they are straight
+        const sequenceFlows = elementRegistry.filter(element => element.type === 'bpmn:SequenceFlow');
+        sequenceFlows.forEach(connection => {
+            modeling.layoutConnection(connection);
+        });
+
+        // Wait for resizing to complete (matches editor's 300ms delay)
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        // =====================================================
+        // Step 3: Apply standard style (colors and Signavio metadata)
+        // (Matches editor's handleStandardStyle)
+        // =====================================================
+
+        // Color Tasks Yellow with Black Border
+        const allTasks = elementRegistry.filter(element => taskTypes.includes(element.type));
         modeling.setColor(allTasks, {
             fill: '#FFFFCC',
             stroke: '#000000'
@@ -231,28 +147,21 @@ export async function processNagarroBPMN(xml) {
             });
         }
 
-        // 4. Apply standard style via XML post-processing
+        // Fix Signavio metadata bordercolors/bgcolors via XML post-processing
         const { xml: processedXml } = await modeler.saveXML({ format: true });
 
-        // Post-process XML for Signavio compatibility
         const finalXml = processedXml
-            // Pool/Lane borders: yellow/white → black
-            .replace(/(<signavio:signavioMetaData metaKey="bordercolor" metaValue=")#FFE66B(")/gi, '$1#000000$2')
-            .replace(/(<signavio:signavioMetaData metaKey="bordercolor" metaValue=")#FFFFFF(")/gi, '$1#000000$2')
-            // Task borders: blue/gray → black
-            .replace(/(<signavio:signavioMetaData metaKey="bordercolor" metaValue=")#788FA6(")/gi, '$1#000000$2')
-            .replace(/(<signavio:signavioMetaData metaKey="bordercolor" metaValue=")#[0-9A-F]{6}(")/gi, '$1#000000$2')
-            // Event borders: green → black
-            .replace(/(<signavio:signavioMetaData metaKey="bordercolor" metaValue=")#CEE67E(")/gi, '$1#000000$2')
-            // Task backgrounds: blue → yellow
+            // All borders → black
+            .replace(/(<signavio:signavioMetaData metaKey="bordercolor" metaValue=")#[0-9A-Fa-f]{6}(")/gi, '$1#000000$2')
+            // Task backgrounds → yellow
             .replace(/(<signavio:signavioMetaData metaKey="bgcolor" metaValue=")#E3F0FF(")/gi, '$1#FFFFCC$2')
-            // Pool/Lane backgrounds: yellow → white
+            // Pool/Lane backgrounds → white
             .replace(/(<signavio:signavioMetaData metaKey="bgcolor" metaValue=")#FFF3B8(")/gi, '$1#FFFFFF$2')
-            // Event backgrounds: green/pink → white
+            // Event backgrounds → white
             .replace(/(<signavio:signavioMetaData metaKey="bgcolor" metaValue=")#F5FAE5(")/gi, '$1#FFFFFF$2')
             .replace(/(<signavio:signavioMetaData metaKey="bgcolor" metaValue=")#FFEAF4(")/gi, '$1#FFFFFF$2');
 
-        // Re-import to apply changes
+        // Re-import to apply changes, then export final XML
         await modeler.importXML(finalXml);
         const { xml: finalProcessedXml } = await modeler.saveXML({ format: true });
 
