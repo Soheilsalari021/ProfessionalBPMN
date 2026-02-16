@@ -2,16 +2,146 @@
 
 
 
+:root {
+  --color-primary: #4ADE80;
+  /* Mint Green */
+  --color-primary-dark: #22c55e;
+  --color-bg-dark: #111827;
+  /* Gray 900 */
+  --color-bg-darker: #030712;
+  /* Gray 950 */
+  --color-text-light: #F9FAFB;
+  /* Gray 50 */
+}
+
 html,
 body,
 #root {
   height: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden;
+  background-color: var(--color-bg-dark);
+  color: var(--color-text-light);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 .react-flow__container {
   height: 100%;
   width: 100%;
+}
+
+/* --- BPMN Dark Mode Overrides --- */
+
+/* Canvas Background */
+.bpmn-dark .djs-container {
+  background-color: #111827 !important;
+  /* gray-900 */
+}
+
+/* --- Shapes and Connections --- */
+/* Main Elements Stroke (Tasks, Gateways, Events) */
+.bpmn-dark .djs-visual> :nth-child(1) {
+  stroke: #e5e7eb !important;
+  /* gray-200 */
+  fill: #1f2937 !important;
+  /* gray-800 background for shapes */
+}
+
+/* Text Labels */
+.bpmn-dark .djs-visual text {
+  fill: #f3f4f6 !important;
+  /* gray-100 */
+}
+
+/* Use brighter colors for specific element types if needed */
+.bpmn-dark .djs-visual path,
+.bpmn-dark .djs-visual rect,
+.bpmn-dark .djs-visual circle,
+.bpmn-dark .djs-visual polygon,
+.bpmn-dark .djs-visual polyline {
+  stroke: #e5e7eb !important;
+}
+
+
+/* --- Palette & Context Pad (The Menus) --- */
+.bpmn-dark .djs-palette,
+.bpmn-dark .djs-context-pad,
+.bpmn-dark .djs-popup {
+  background-color: #1f2937 !important;
+  /* gray-800 */
+  border: 1px solid #374151 !important;
+  /* gray-700 */
+}
+
+/* Default icon color in palette/context pad */
+.bpmn-dark .djs-palette .entry,
+.bpmn-dark .djs-context-pad .entry {
+  color: #e5e7eb !important;
+  /* gray-200 */
+}
+
+/* Icons often use ::before, ensure they are colored */
+.bpmn-dark .djs-palette .entry::before,
+.bpmn-dark .djs-context-pad .entry::before {
+  color: #e5e7eb !important;
+}
+
+/* SVG icons inside entries */
+.bpmn-dark .djs-palette .entry svg,
+.bpmn-dark .djs-context-pad .entry svg {
+  fill: #e5e7eb !important;
+}
+
+
+/* Hover States */
+.bpmn-dark .djs-palette .entry:hover,
+.bpmn-dark .djs-context-pad .entry:hover {
+  background-color: #374151 !important;
+  /* gray-700 hover */
+  color: #10b981 !important;
+  /* emerald-500 hover text */
+}
+
+.bpmn-dark .djs-palette .entry:hover::before,
+.bpmn-dark .djs-context-pad .entry:hover::before {
+  color: #10b981 !important;
+}
+
+/* Connectors / Grid */
+.bpmn-dark .djs-connection .djs-visual path {
+  stroke: #e5e7eb !important;
+}
+
+.bpmn-dark .layer-grid {
+  opacity: 0.1;
+  filter: invert(1);
+}
+
+.bpmn-dark .djs-outline {
+  stroke: #10b981 !important;
+}
+
+/* ===== Apple-Style Scroll Animations ===== */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(60px);
+  transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.scroll-reveal.scroll-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.scroll-child {
+  opacity: 0;
+  transform: translateY(30px) scale(0.97);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.scroll-child.scroll-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
 }

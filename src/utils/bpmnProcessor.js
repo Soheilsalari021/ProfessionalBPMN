@@ -86,7 +86,91 @@ export async function processNagarroBPMN(xml) {
             modeling.resizeShape(subProcess, bounds);
         });
 
-        // 3. Apply standard colors directly
+        // 3. Auto-Layout Logic
+        // Simple BFS-based layout to organize nodes into levels
+
+        // Refresh elementRegistry after replacements
+        const elementsAfterResize = elementRegistry.getAll();
+        const startEvents = elementsAfterResize.filter(e => e.type === 'bpmn:StartEvent');
+
+        if (startEvents.length > 0) {
+            const visited = new Set();
+            const queue = [];
+            const elementLevels = new Map(); // elementId -> level
+
+            // Initialize BFS
+            startEvents.forEach(start => {
+                queue.push({ element: start, level: 0 });
+                visited.add(start.id);
+                elementLevels.set(start.id, 0);
+            });
+
+            let maxLevel = 0;
+
+            while (queue.length > 0) {
+                const { element, level } = queue.shift();
+                maxLevel = Math.max(maxLevel, level);
+
+                // Get outgoing sequence flows
+                const outgoing = element.outgoing || [];
+                outgoing.forEach(flow => {
+                    const target = flow.target;
+                    // Only process Shapes, ignore Connections in queue
+                    if (target && !visited.has(target.id) && target.type !== 'bpmn:SequenceFlow') {
+                        visited.add(target.id);
+                        elementLevels.set(target.id, level + 1);
+                        queue.push({ element: target, level: level + 1 });
+                    }
+                });
+            }
+
+            // Group elements by level
+            const levelGroups = new Map();
+            elementLevels.forEach((level, id) => {
+                if (!levelGroups.has(level)) levelGroups.set(level, []);
+                const el = elementRegistry.get(id);
+                if (el) levelGroups.get(level).push(el);
+            });
+
+            // Assign coordinates
+            const startX = 150;
+            const startY = 150;
+            const xStep = 220; // Horizontal spacing
+            const yStep = 150; // Vertical spacing
+
+            levelGroups.forEach((elements, level) => {
+                // Determine Y start for this level to center it?
+                // Or just stack from top
+                const levelHeight = elements.length * yStep;
+                const startYForLevel = startY - (levelHeight / 2) + (yStep / 2);
+
+                elements.forEach((element, index) => {
+                    // Calculate target position (center of shape)
+                    const targetX = startX + (level * xStep);
+                    const targetY = startYForLevel + (index * yStep);
+
+                    // Move element (delta)
+                    // Note: element.x/y are top-left coordinates usually
+                    // Let's assume we align top-left for simplicity or recalculate based on width/height
+
+                    const currentX = element.x;
+                    const currentY = element.y;
+
+                    const deltaX = targetX - currentX;
+                    const deltaY = targetY - currentY;
+
+                    if (deltaX !== 0 || deltaY !== 0) {
+                        try {
+                            modeling.moveElements([element], { x: deltaX, y: deltaY });
+                        } catch (e) {
+                            console.warn("Auto-layout move failed for", element.id, e);
+                        }
+                    }
+                });
+            });
+        }
+
+        // 4. Apply standard colors directly
         const taskTypes = [
             'bpmn:Task',
             'bpmn:SubProcess',
