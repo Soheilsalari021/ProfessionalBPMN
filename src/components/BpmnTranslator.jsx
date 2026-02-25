@@ -31,7 +31,7 @@ export default function BpmnTranslator({ onBack }) {
         const newFiles = [];
 
         for (const file of uploadedFiles) {
-            if (!file.name.endsWith('.bpmn') && !file.name.endsWith('.xml')) {
+            if (!file.name.endsWith('.bpmn') && !file.name.endsWith('.xml') && !file.name.endsWith('.bpmn2')) {
                 setError(`File "${file.name}" is not a BPMN file.`);
                 setTimeout(() => setError(null), 3000);
                 continue;
@@ -194,7 +194,7 @@ export default function BpmnTranslator({ onBack }) {
                 const translatedXml = serializer.serializeToString(xmlDoc);
 
                 // Add to ZIP
-                const baseName = file.name.replace('.bpmn', '').replace('.xml', '');
+                const baseName = file.name.replace(/\.(bpmn|xml|bpmn2)$/i, '');
                 zip.file(`${baseName}_${targetLang}.bpmn`, translatedXml);
             }
 
@@ -390,13 +390,13 @@ export default function BpmnTranslator({ onBack }) {
                                     <p className="text-sm text-gray-400 group-hover/drop:text-gray-300">
                                         <span className="font-semibold text-purple-400">Click to browse</span> or drag and drop
                                     </p>
-                                    <p className="text-xs text-gray-500 mt-1">.bpmn or .xml files only</p>
+                                    <p className="text-xs text-gray-500 mt-1">.bpmn, .bpmn2 or .xml files only</p>
                                 </div>
                                 <input
                                     type="file"
                                     className="hidden"
                                     multiple
-                                    accept=".bpmn,.xml"
+                                    accept=".bpmn,.xml,.bpmn2"
                                     onChange={handleFileUpload}
                                     disabled={isTranslating}
                                 />

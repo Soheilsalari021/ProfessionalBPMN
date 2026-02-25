@@ -40,7 +40,7 @@ export default function SgxConverter({ onBack }) {
         const newFiles = [];
 
         for (const file of uploadedFiles) {
-            if (!file.name.endsWith('.bpmn') && !file.name.endsWith('.xml')) {
+            if (!file.name.endsWith('.bpmn') && !file.name.endsWith('.xml') && !file.name.endsWith('.bpmn2')) {
                 setError(`File "${file.name}" is not a BPMN file.`);
                 setTimeout(() => setError(null), 3000);
                 continue;
@@ -295,7 +295,7 @@ export default function SgxConverter({ onBack }) {
                                                     type="file"
                                                     className="hidden"
                                                     multiple
-                                                    accept=".bpmn,.xml"
+                                                    accept=".bpmn,.xml,.bpmn2"
                                                     onChange={(e) => handleFileUpload(folder.id, e)}
                                                 />
                                             </label>
