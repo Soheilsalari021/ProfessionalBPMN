@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { processNagarroBPMN } from '../utils/bpmnProcessor';
 
-export default function FileUpload({ onFileLoaded, onShowTutorial, onShowRequirements }) {
+export default function FileUpload({ onFileLoaded, onShowTutorial, onShowRequirements, onShowSgxConverter, onShowTranslator }) {
     const [isDragging, setIsDragging] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const [processStatus, setProcessStatus] = useState('');
@@ -185,10 +185,10 @@ export default function FileUpload({ onFileLoaded, onShowTutorial, onShowRequire
                         </div>
 
                         {/* Right Column: App Tiles */}
-                        <div className="w-full max-w-xl mx-auto lg:ml-auto space-y-6">
-                            {/* BPMN Studio */}
+                        <div className="w-full max-w-xl mx-auto lg:ml-auto grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* BPMN Studio (Full Width) */}
                             <div
-                                className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-gray-900/40 backdrop-blur-xl transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] ${isDragging ? 'ring-2 ring-emerald-500/50 scale-[1.02]' : ''} h-40`}
+                                className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-gray-900/40 backdrop-blur-xl transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] ${isDragging ? 'ring-2 ring-emerald-500/50 scale-[1.02]' : ''} h-32 md:col-span-2`}
                                 onDragOver={handleDragOver}
                                 onDragLeave={handleDragLeave}
                                 onDrop={handleDrop}
@@ -258,19 +258,59 @@ export default function FileUpload({ onFileLoaded, onShowTutorial, onShowRequire
                             </div>
 
                             {/* Requirements Builder */}
-                            <div onClick={onShowRequirements} className="group relative overflow-hidden rounded-2xl border border-gray-700 bg-gray-800/80 backdrop-blur-md p-6 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500 hover:shadow-[0_0_30px_rgba(16,185,129,0.2)] cursor-pointer">
-                                <div className="flex items-start space-x-4">
-                                    <div className="flex-shrink-0 h-14 w-14 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                            <div onClick={onShowRequirements} className="group relative overflow-hidden rounded-2xl border border-gray-700 bg-gray-800/80 backdrop-blur-md p-5 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500 hover:shadow-[0_0_30px_rgba(16,185,129,0.2)] cursor-pointer h-full flex flex-col justify-between">
+                                <div className="flex flex-col space-y-3">
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex-shrink-0 h-12 w-12 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                                            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                                            </svg>
+                                        </div>
+                                        <div className="h-8 w-8 rounded-full bg-gray-700 flex items-center justify-center group-hover:bg-emerald-500/20 group-hover:text-emerald-400 transition-colors">
+                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-bold text-white group-hover:text-emerald-400 transition-colors">Requirements</h3>
+                                        <p className="text-xs text-gray-400 mt-1 line-clamp-2">Define process requirements interactively.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* SGX Converter */}
+                            <div onClick={onShowSgxConverter} className="group relative overflow-hidden rounded-2xl border border-gray-700 bg-gray-800/80 backdrop-blur-md p-5 transition-all duration-300 hover:-translate-y-1 hover:border-rose-500 hover:shadow-[0_0_30px_rgba(225,29,72,0.2)] cursor-pointer h-full flex flex-col justify-between">
+                                <div className="flex flex-col space-y-3">
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex-shrink-0 h-12 w-12 rounded-xl bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                                            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                                            </svg>
+                                        </div>
+                                        <div className="h-8 w-8 rounded-full bg-gray-700 flex items-center justify-center group-hover:bg-rose-500/20 group-hover:text-rose-400 transition-colors">
+                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-bold text-white group-hover:text-rose-400 transition-colors">SGX Converter</h3>
+                                        <p className="text-xs text-gray-400 mt-1 line-clamp-2">Package files for Signavio.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* BPMN Translator */}
+                            <div onClick={onShowTranslator} className="group relative overflow-hidden rounded-2xl border border-gray-700 bg-gray-800/80 backdrop-blur-md p-5 transition-all duration-300 hover:-translate-y-1 hover:border-purple-500 hover:shadow-[0_0_30px_rgba(168,85,247,0.2)] cursor-pointer h-full flex flex-col justify-between md:col-span-2">
+                                <div className="flex items-center space-x-4">
+                                    <div className="flex-shrink-0 h-14 w-14 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
                                         <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
                                         </svg>
                                     </div>
                                     <div className="flex-grow">
-                                        <h3 className="text-xl font-bold text-white group-hover:text-emerald-400 transition-colors">Requirements Builder</h3>
-                                        <p className="text-sm text-gray-400 mt-1">Define process requirements interactively. Generate BPMN diagrams from steps.</p>
+                                        <h3 className="text-xl font-bold text-white group-hover:text-purple-400 transition-colors">BPMN Translator</h3>
+                                        <p className="text-sm text-gray-400 mt-1">Auto-translate diagrams via free API.</p>
                                     </div>
                                     <div className="self-center">
-                                        <div className="h-8 w-8 rounded-full bg-gray-700 flex items-center justify-center group-hover:bg-emerald-500/20 group-hover:text-emerald-400 transition-colors">
+                                        <div className="h-8 w-8 rounded-full bg-gray-700 flex items-center justify-center group-hover:bg-purple-500/20 group-hover:text-purple-400 transition-colors">
                                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                                         </div>
                                     </div>
@@ -418,6 +458,95 @@ export default function FileUpload({ onFileLoaded, onShowTutorial, onShowRequire
                                         <div key={i} className="flex items-center gap-3">
                                             <div className="h-10 w-10 rounded-xl bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
                                                 <svg className="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={path} /></svg>
+                                            </div>
+                                            <span className="text-gray-300 font-medium">{label}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ===== SECTION: SGX Converter ===== */}
+            <section className="bg-gray-900 border-t border-white/5 scroll-reveal">
+                <div className="container mx-auto px-8 py-28">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                        <div className="order-2 lg:order-1 flex justify-center scroll-child">
+                            <div className="relative w-full max-w-md">
+                                <div className="absolute inset-0 bg-gradient-to-br from-rose-500/20 to-orange-500/10 rounded-3xl blur-3xl"></div>
+                                <div className="relative bg-gray-950/80 border border-white/10 rounded-3xl p-8 backdrop-blur-xl space-y-4">
+                                    {[
+                                        ['M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z', 'Create custom folder structures'],
+                                        ['M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12', 'Upload matching BPMN files'],
+                                        ['M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4', 'Package into a single Zip file'],
+                                        ['M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4', 'Ready for Signavio import'],
+                                    ].map(([path, label], i) => (
+                                        <div key={i} className="flex items-center gap-3">
+                                            <div className="h-10 w-10 rounded-xl bg-rose-500/20 flex items-center justify-center flex-shrink-0">
+                                                <svg className="w-5 h-5 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={path} /></svg>
+                                            </div>
+                                            <span className="text-gray-300 font-medium">{label}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="order-1 lg:order-2 scroll-child">
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center shadow-lg">
+                                    <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
+                                </div>
+                                <h2 className="text-4xl font-black text-white">SGX Converter</h2>
+                            </div>
+                            <div className="h-1 w-20 bg-gradient-to-r from-rose-500 to-orange-500 rounded-full mb-8"></div>
+                            <p className="text-gray-300 text-lg leading-relaxed mb-6">
+                                The SGX Converter makes it incredibly simple to prepare your files for Signavio dictionaries and workspaces.
+                            </p>
+                            <p className="text-gray-400 leading-relaxed mb-6">
+                                Build your exact folder hierarchy right in the browser. Drop your specific BPMN files into matching folders like "SD" or "FI", and package them instantly into a `.sgx` (ZIP compressed) file natively parsed by business systems.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ===== SECTION: Translator ===== */}
+            <section className="bg-gray-950 border-t border-white/5 scroll-reveal">
+                <div className="container mx-auto px-8 py-28">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                        <div className="scroll-child">
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                                    <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" /></svg>
+                                </div>
+                                <h2 className="text-4xl font-black text-white">BPMN Translator</h2>
+                            </div>
+                            <div className="h-1 w-20 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full mb-8"></div>
+                            <p className="text-gray-300 text-lg leading-relaxed mb-6">
+                                Break down language barriers in process documentation instantly, completely free directly in your browser.
+                            </p>
+                            <p className="text-gray-400 leading-relaxed mb-6">
+                                The BPMN Translator reads your process diagrams, identifies all text (task names, event descriptions, lanes), and translates them using a free public API. Choose from multiple languages including German, Spanish, French, and Japanese.
+                            </p>
+                            <p className="text-gray-400 leading-relaxed">
+                                Upload a batch of files in English and download a compressed ZIP containing identical structural mappings in the newly selected target language.
+                            </p>
+                        </div>
+                        <div className="flex justify-center scroll-child">
+                            <div className="relative w-full max-w-md">
+                                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-purple-600/10 rounded-3xl blur-3xl"></div>
+                                <div className="relative bg-gray-900/80 border border-white/10 rounded-3xl p-8 backdrop-blur-xl space-y-4">
+                                    {[
+                                        ['M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129', 'Supports 10+ major languages'],
+                                        ['M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15', 'Preserves identical ID structures'],
+                                        ['M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2', 'Batch process multiple files'],
+                                        ['M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z', '100% Free with no API keys req.'],
+                                    ].map(([path, label], i) => (
+                                        <div key={i} className="flex items-center gap-3">
+                                            <div className="h-10 w-10 rounded-xl bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                                                <svg className="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={path} /></svg>
                                             </div>
                                             <span className="text-gray-300 font-medium">{label}</span>
                                         </div>

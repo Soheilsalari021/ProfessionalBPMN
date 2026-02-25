@@ -3,6 +3,8 @@ import FileUpload from './components/FileUpload';
 import BpmnEditor from './components/BpmnEditor';
 import RequirementsPage from './components/RequirementsPage';
 import TutorialPage from './components/TutorialPage';
+import SgxConverter from './components/SgxConverter';
+import BpmnTranslator from './components/BpmnTranslator';
 
 function App() {
   /* 
@@ -20,6 +22,10 @@ function App() {
   const [showRequirements, setShowRequirements] = useState(false);
   // State for Tutorial Page
   const [showTutorial, setShowTutorial] = useState(false);
+  // State for SGX Converter Page
+  const [showSgxConverter, setShowSgxConverter] = useState(false);
+  // State for BPMN Translator Page
+  const [showTranslator, setShowTranslator] = useState(false);
 
   /*
    * Save to localStorage whenever state changes
@@ -71,7 +77,17 @@ function App() {
     );
   }
 
-  // 2. Main App Render (Home or Editor)
+  // 3. If SGX Converter is active, show it full screen
+  if (showSgxConverter) {
+    return <SgxConverter onBack={() => setShowSgxConverter(false)} />;
+  }
+
+  // 4. If BPMN Translator is active, show it full screen
+  if (showTranslator) {
+    return <BpmnTranslator onBack={() => setShowTranslator(false)} />;
+  }
+
+  // 5. Main App Render (Home or Editor)
   return (
     <div className={`h-screen w-screen flex flex-col bg-gray-900 text-gray-100 ${xml ? 'overflow-hidden' : 'overflow-y-auto overflow-x-hidden'}`}>
       {/* Navbar */}
@@ -111,7 +127,18 @@ function App() {
             >
               Requirements Builder
             </button>
-            <span className="text-sm font-medium text-gray-500 uppercase tracking-widest">Coming Soon</span>
+            <button
+              onClick={() => setShowSgxConverter(true)}
+              className="text-sm font-medium text-gray-300 hover:text-rose-400 transition-colors uppercase tracking-widest flex items-center gap-2"
+            >
+              SGX Converter
+            </button>
+            <button
+              onClick={() => setShowTranslator(true)}
+              className="text-sm font-medium text-gray-300 hover:text-purple-400 transition-colors uppercase tracking-widest flex items-center gap-2"
+            >
+              Translator
+            </button>
             <button
               onClick={() => setShowTutorial(true)}
               className="text-sm font-bold bg-emerald-500 text-gray-900 px-6 py-2 rounded-full hover:bg-emerald-400 hover:shadow-[0_0_20px_rgba(52,211,153,0.5)] transition-all transform hover:-translate-y-0.5"
@@ -124,7 +151,13 @@ function App() {
 
       <main className="flex-grow relative h-full w-full">
         {!xml ? (
-          <FileUpload onFileLoaded={handleFileLoaded} onShowTutorial={() => setShowTutorial(true)} onShowRequirements={() => setShowRequirements(true)} />
+          <FileUpload
+            onFileLoaded={handleFileLoaded}
+            onShowTutorial={() => setShowTutorial(true)}
+            onShowRequirements={() => setShowRequirements(true)}
+            onShowSgxConverter={() => setShowSgxConverter(true)}
+            onShowTranslator={() => setShowTranslator(true)}
+          />
         ) : (
           <BpmnEditor xml={xml} filename={filename} onFilenameChange={setFilename} />
         )}
